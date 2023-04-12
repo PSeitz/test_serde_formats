@@ -1,3 +1,7 @@
+use prettytable::{
+    format::{FormatBuilder, LinePosition, LineSeparator},
+    row, Table,
+};
 use test_struct::IntermediateAggregationResults;
 
 use crate::test_struct::get_test_struct;
@@ -5,16 +9,44 @@ use crate::test_struct::get_test_struct;
 use anyhow::Result;
 mod test_struct;
 
+fn get_markdown_table() -> Table {
+    let mut table = Table::new();
+
+    let minus_pipe_sep: LineSeparator = LineSeparator::new('-', '|', '|', '|');
+    let format_markdown = FormatBuilder::new()
+        .padding(1, 1)
+        .borders('|')
+        .separator(LinePosition::Title, minus_pipe_sep)
+        .column_separator('|')
+        .build();
+    table.set_format(format_markdown);
+
+    table
+}
+
 fn main() {
     let test_struct = get_test_struct();
 
-    println!("Json: {:?} ", test_json(&test_struct));
-    println!("Postcard: {:?} ", test_postcard(&test_struct));
-    println!("Ron: {:?} ", test_ron(&test_struct));
-    println!("MessagePack: {:?} ", test_rmp(&test_struct));
-    println!("Bincode: {:?} ", test_bincode(&test_struct));
-    println!("Ciborium: {:?} ", test_ciborium(&test_struct));
-    println!("Bson: {:?} ", test_bson(&test_struct));
+    let mut table = get_markdown_table();
+    table.set_titles(row!["Format", "Result",]);
+
+    table.add_row(row!["Json", format!("{:?}", test_json(&test_struct))]);
+    table.add_row(row![
+        "Postcard ",
+        format!("{:?}", test_postcard(&test_struct))
+    ]);
+    table.add_row(row!["Ron", format!("{:?}", test_ron(&test_struct))]);
+    table.add_row(row![
+        "MessagePack ",
+        format!("{:?}", test_rmp(&test_struct))
+    ]);
+    table.add_row(row!["Bincode", format!("{:?}", test_bincode(&test_struct))]);
+    table.add_row(row![
+        "Ciborium ",
+        format!("{:?}", test_ciborium(&test_struct))
+    ]);
+    table.add_row(row!["Bson", format!("{:?}", test_bson(&test_struct))]);
+    table.printstd();
 }
 
 fn test_json(test_struct: &IntermediateAggregationResults) -> Result<()> {

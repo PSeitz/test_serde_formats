@@ -6,18 +6,15 @@ Compare different formats if they succeed in de/serialization roundtrip for a re
 The tested datastructure contains:
 - Nested enums
 - Circular structs
-- f64::INFINITY
-- Integer key in Hashmap
 
 # Results
 
-| Format       | Result                                                                                |
-|--------------|---------------------------------------------------------------------------------------|
-| Json         | Err(invalid type: null, expected f64 at line 1 column 81)                             |
-| Postcard     | Err(Found an Option discriminant that wasn't 0 or 1)                                  |
-| Ron          | Ok(())                                                                                |
-| MessagePack  | Err(invalid length 0, expected struct IntermediateAggregationResults with 2 elements) |
-| Bincode      | Err(invalid value: integer `10`, expected variant index 0 <= i < 2)                   |
-| Ciborium     | Ok(())                                                                                |
-| Bson         | Err(Invalid map key type: 10)                                                         |
+| Format   | Result | Serialized Size | Serialize Time | Deserialize Time |
+|----------|--------|-----------------|----------------|------------------|
+| Json     | Ok     | 690             | 6242           | 10239            |
+| RON      | Ok     | 1196            | 12253          | 19146            |
+| Bincode  | Ok     | 309             | 1213           | 2825             |
+| Bitcode  | Ok     | 150             | 1834           | 2515             |
+| Ciborium | Ok     | 486             | 3356           | 9918             |
+
 

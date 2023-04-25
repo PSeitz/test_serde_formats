@@ -9,12 +9,12 @@ The tested datastructure contains:
 
 # Results
 
-| Format   | Result | Serialized Size | Serialize Time | Deserialize Time |
-|----------|--------|-----------------|----------------|------------------|
-| Json     | Ok     | 690             | 6242           | 10239            |
-| RON      | Ok     | 1196            | 12253          | 19146            |
-| Bincode  | Ok     | 309             | 1213           | 2825             |
-| Bitcode  | Ok     | 150             | 1834           | 2515             |
-| Ciborium | Ok     | 486             | 3356           | 9918             |
+| Format   | Result | Serialized Size | Serialize Time [ns] | Deserialize Time [ns] |
+|----------|--------|-----------------|---------------------|-----------------------|
+| Json     | Ok     | 2469160         | 5123010             | 8810734               |
+| RON      | Ok     | 2179713         | 8993176             | 24152544              |
+| Bincode  | Ok     | 960144          | 1759824             | 1659657               |
+| Bitcode  | Ok     | 580069          | 1165111             | 2183037               |
+| Ciborium | Ok     | 1749907         | 5266750             | 10346990              |
 
 

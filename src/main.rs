@@ -45,8 +45,8 @@ fn main() {
         "Format",
         "Result",
         "Serialized Size",
-        "Serialize Time",
-        "Deserialize Time"
+        "Serialize Time [ns]",
+        "Deserialize Time [ns]"
     ]);
     table.add_row(get_row_for_format::<_, Json>(&test_struct));
     table.add_row(get_row_for_format::<_, Ron>(&test_struct));

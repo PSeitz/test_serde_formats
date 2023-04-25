@@ -28,7 +28,7 @@ impl Default for IntermediateMetricResult {
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
 /// The percentiles collector used during segment collection and for merging results.
 pub struct PercentilesCollector {
-    //sketch: sketches_ddsketch::DDSketch,
+    buckets: Vec<u64>, //sketch: sketches_ddsketch::DDSketch,
 }
 
 impl Debug for PercentilesCollector {
@@ -40,6 +40,7 @@ impl Debug for PercentilesCollector {
 impl Default for PercentilesCollector {
     fn default() -> Self {
         Self {
+            buckets: Vec::new(),
             //sketch: sketches_ddsketch::DDSketch::new(Default::default()),
         }
     }
@@ -165,9 +166,13 @@ pub fn get_test_struct() -> IntermediateAggregationResults {
     let mut buckets = VecWithNames::default();
 
     metrics.keys.push("percentiles".to_owned());
-    metrics
-        .values
-        .push(IntermediateMetricResult::Percentiles(Default::default()));
+
+    let percentile_buckets: Vec<u64> = (0..10_000).collect();
+    metrics.values.push(IntermediateMetricResult::Percentiles(
+        PercentilesCollector {
+            buckets: percentile_buckets,
+        },
+    ));
 
     metrics.keys.push("stats".to_owned());
     metrics
@@ -175,13 +180,17 @@ pub fn get_test_struct() -> IntermediateAggregationResults {
         .push(IntermediateMetricResult::Stats(Default::default()));
 
     buckets.keys.push("histogram".to_owned());
-    buckets.values.push(IntermediateBucketResult::HistogramVec {
-        column_type: Default::default(),
-        buckets: vec![IntermediateHistogramBucketEntry {
+    let histogram_buckets: Vec<IntermediateHistogramBucketEntry> = (0..10_000)
+        .map(|_| IntermediateHistogramBucketEntry {
             key: 10.0,
             doc_count: 100,
             sub_aggregation: get_leaf(),
-        }],
+        })
+        .collect();
+
+    buckets.values.push(IntermediateBucketResult::HistogramVec {
+        column_type: Default::default(),
+        buckets: histogram_buckets,
     });
 
     IntermediateAggregationResults {
@@ -191,23 +200,7 @@ pub fn get_test_struct() -> IntermediateAggregationResults {
 }
 
 pub fn get_leaf() -> IntermediateAggregationResults {
-    let mut metrics = VecWithNames::default();
     let mut buckets = VecWithNames::default();
-
-    metrics.keys.push("percentiles".to_owned());
-    metrics
-        .values
-        .push(IntermediateMetricResult::Percentiles(Default::default()));
-
-    buckets.keys.push("bucket1".to_owned());
-    buckets.values.push(IntermediateBucketResult::HistogramVec {
-        column_type: Default::default(),
-        buckets: vec![IntermediateHistogramBucketEntry {
-            key: 10.0,
-            doc_count: 100,
-            sub_aggregation: Default::default(),
-        }],
-    });
 
     buckets.keys.push("bucket2".to_owned());
     buckets
@@ -227,7 +220,7 @@ pub fn get_leaf() -> IntermediateAggregationResults {
         });
 
     IntermediateAggregationResults {
-        metrics: Some(metrics),
+        metrics: None,
         buckets: Some(buckets),
     }
 }

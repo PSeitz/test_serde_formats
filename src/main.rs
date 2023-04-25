@@ -2,7 +2,7 @@ use std::fmt;
 
 use prettytable::cell;
 
-use formats::{Bincode, Bitcode, Ciborium, Json, Ron};
+use formats::{Bincode, Bitcode, Ciborium, Json, Postcard, Rmp, Ron};
 use prettytable::{
     format::{FormatBuilder, LinePosition, LineSeparator},
     Row, Table,
@@ -56,6 +56,8 @@ fn main() {
     table.add_row(get_row_for_format::<_, Bincode>(&test_struct));
     //table.add_row(get_row_for_format::<_, Bson>(&test_struct));
     table.add_row(get_row_for_format::<_, Bitcode>(&test_struct));
+    table.add_row(get_row_for_format::<_, Rmp>(&test_struct));
+    table.add_row(get_row_for_format::<_, Postcard>(&test_struct));
     table.add_row(get_row_for_format::<_, Ciborium>(&test_struct));
     table.printstd();
 }

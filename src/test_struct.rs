@@ -83,9 +83,7 @@ pub struct IntermediateHistogramBucketEntry {
 /// intermediate results.
 #[derive(Debug, PartialEq, Default, Clone, Serialize, Deserialize)]
 pub struct IntermediateAggregationResults {
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) metrics: Option<VecWithNames<IntermediateMetricResult>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) buckets: Option<VecWithNames<IntermediateBucketResult>>,
 }
 
@@ -119,13 +117,24 @@ pub struct IntermediateStats {
     max: f64,
 }
 
+//impl Default for IntermediateStats {
+//fn default() -> Self {
+//Self {
+//count: 0,
+//sum: 0.0,
+//min: f64::INFINITY,
+//max: f64::NEG_INFINITY,
+//}
+//}
+//}
+
 impl Default for IntermediateStats {
     fn default() -> Self {
         Self {
             count: 0,
             sum: 0.0,
-            min: f64::INFINITY,
-            max: f64::NEG_INFINITY,
+            min: f64::MIN,
+            max: f64::MAX,
         }
     }
 }

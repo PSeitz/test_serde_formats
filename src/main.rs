@@ -5,7 +5,7 @@ use prettytable::cell;
 use formats::{Bincode, Bitcode, Ciborium, Json, Ron};
 use prettytable::{
     format::{FormatBuilder, LinePosition, LineSeparator},
-    row, Row, Table,
+    Row, Table,
 };
 use serde::{de::DeserializeOwned, Serialize};
 
@@ -41,13 +41,16 @@ fn main() {
     let test_struct = get_test_struct();
 
     let mut table = get_markdown_table();
-    table.set_titles(row![
-        "Format",
-        "Result",
-        "Serialized Size",
-        "Serialize Time [ns]",
-        "Deserialize Time [ns]"
-    ]);
+
+    let mut row = Row::empty();
+    row.add_cell(cell!["Format"]);
+    row.add_cell(cell!["Result"]);
+    row.add_cell(cell!["Serialized Size"]);
+    row.add_cell(cell!["Serialize Time [ns]"]);
+    row.add_cell(cell!["Deserialize Time [ns]"]);
+    row.add_cell(cell!["Roundtrip Time [ns]"]);
+
+    table.set_titles(row);
     table.add_row(get_row_for_format::<_, Json>(&test_struct));
     table.add_row(get_row_for_format::<_, Ron>(&test_struct));
     table.add_row(get_row_for_format::<_, Bincode>(&test_struct));
@@ -57,10 +60,12 @@ fn main() {
     table.printstd();
 }
 
+#[derive(Debug, Default)]
 struct FormatResult {
     serialize_time: u128,
     deserialize_time: u128,
     serialized_size: usize,
+    roundtrip_time: u128,
     result: String,
 }
 
@@ -75,6 +80,7 @@ fn get_row_for_format<T: PartialEq + Serialize + DeserializeOwned + std::fmt::De
     row.add_cell(cell!(res.serialized_size));
     row.add_cell(cell!(res.serialize_time));
     row.add_cell(cell!(res.deserialize_time));
+    row.add_cell(cell!(res.roundtrip_time));
     row
 }
 
@@ -85,10 +91,8 @@ fn test_format<T: PartialEq + Serialize + DeserializeOwned + std::fmt::Debug, F:
     let output = F::serialize(test_struct);
     if output.is_err() {
         return FormatResult {
-            serialize_time: 0,
-            deserialize_time: 0,
-            serialized_size: 0,
             result: format!("Ser Err: {:?}", output.unwrap_err()),
+            ..Default::default()
         };
     }
 
@@ -100,9 +104,9 @@ fn test_format<T: PartialEq + Serialize + DeserializeOwned + std::fmt::Debug, F:
     if deser.is_err() {
         return FormatResult {
             serialize_time: serialize_time.as_nanos(),
-            deserialize_time: 0,
             serialized_size,
             result: format!("Deser Err: {:?}", deser.unwrap_err()),
+            ..Default::default()
         };
     }
 
@@ -112,6 +116,7 @@ fn test_format<T: PartialEq + Serialize + DeserializeOwned + std::fmt::Debug, F:
     FormatResult {
         serialize_time: serialize_time.as_nanos(),
         deserialize_time: deserialize_time.as_nanos(),
+        roundtrip_time: deserialize_time.as_nanos() + serialize_time.as_nanos(),
         serialized_size,
         result: result.to_string(),
     }

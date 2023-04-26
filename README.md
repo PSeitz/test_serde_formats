@@ -20,7 +20,7 @@ The tested datastructure contains:
 | Ciborium    | Ok     | 1749907         | 6345706             | 15620680              | 21966386            |
 
 
-## Term Aggregation
+## Term Aggregation Intermediate Result
 
 | Format      | Result | Serialized Size | Serialize Time [ns] | Deserialize Time [ns] | Roundtrip Time [ns] |
 |-------------|--------|-----------------|---------------------|-----------------------|---------------------|
@@ -32,7 +32,7 @@ The tested datastructure contains:
 | Postcard    | Ok     | 17860           | 17683               | 44082                 | 61765               |
 | Ciborium    | Ok     | 49452           | 96902               | 244397                | 341299              |
 
-## Percentile Aggregation
+## Percentile Aggregation Intermediate Result
 
 | Format      | Result | Serialized Size | Serialize Time [ns] | Deserialize Time [ns] | Roundtrip Time [ns] |
 |-------------|--------|-----------------|---------------------|-----------------------|---------------------|

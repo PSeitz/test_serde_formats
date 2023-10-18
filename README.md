@@ -1,4 +1,5 @@
 
+
 # Serde Format Tests
 
 Compare different formats if they succeed in de/serialization roundtrip for a reasonable complex datatype.
@@ -8,6 +9,10 @@ The tested datastructure contains:
 - Circular structs
 
 # Results
+
+Run with `cargo run --release`
+
+There's no warmup, so wall time may be inaccurate.
 
 | Format      | Result | Serialized Size | Serialize Time [ns] | Deserialize Time [ns] | Roundtrip Time [ns] |
 |-------------|--------|-----------------|---------------------|-----------------------|---------------------|

@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use speedy::{Readable, Writable};
 use std::{collections::HashMap, fmt::Debug};
 
 /// An aggregation is either a bucket or a metric.
-#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize, Readable, Writable)]
 pub enum IntermediateAggregationResult {
     /// Bucket variant
     Bucket(IntermediateBucketResult),
@@ -11,7 +12,7 @@ pub enum IntermediateAggregationResult {
 }
 
 /// Holds the intermediate data for metric results
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, Readable, Writable)]
 pub enum IntermediateMetricResult {
     /// Intermediate average result.
     Percentiles(PercentilesCollector),
@@ -25,7 +26,7 @@ impl Default for IntermediateMetricResult {
     }
 }
 
-#[derive(Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize, Readable, Writable)]
 /// The percentiles collector used during segment collection and for merging results.
 pub struct PercentilesCollector {
     buckets: Vec<u64>, //sketch: sketches_ddsketch::DDSketch,
@@ -48,7 +49,7 @@ impl Default for PercentilesCollector {
 
 /// The intermediate bucket results. Internally they can be easily merged via the keys of the
 /// buckets.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, Readable, Writable)]
 pub enum IntermediateBucketResult {
     /// This is the histogram entry for a bucket, which contains a key, count, and optionally
     /// sub_aggregations.
@@ -70,7 +71,7 @@ pub enum IntermediateBucketResult {
 
 /// This is the histogram entry for a bucket, which contains a key, count, and optionally
 /// sub_aggregations.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, Readable, Writable)]
 pub struct IntermediateHistogramBucketEntry {
     /// The unique the bucket is identified.
     pub key: f64,
@@ -82,14 +83,14 @@ pub struct IntermediateHistogramBucketEntry {
 
 /// Contains the intermediate aggregation result, which is optimized to be merged with other
 /// intermediate results.
-#[derive(Debug, PartialEq, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Default, Clone, Serialize, Deserialize, Readable, Writable)]
 pub struct IntermediateAggregationResults {
     pub(crate) metrics: Option<VecWithNames<IntermediateMetricResult>>,
     pub(crate) buckets: Option<VecWithNames<IntermediateBucketResult>>,
 }
 
 /// Represents an associative array `(key => values)` in a very efficient manner.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize, Readable, Writable)]
 pub(crate) struct VecWithNames<T: Clone + Debug> {
     pub(crate) values: Vec<T>,
     pub(crate) keys: Vec<String>,
@@ -106,7 +107,7 @@ impl<T: Clone + Debug> Default for VecWithNames<T> {
 
 /// Intermediate result of the stats aggregation that can be combined with other intermediate
 /// results.
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Debug, Serialize, Deserialize, Readable, Writable)]
 pub struct IntermediateStats {
     /// The number of extracted values.
     count: u64,
@@ -142,7 +143,20 @@ impl Default for IntermediateStats {
 
 /// The column type represents the column type.
 /// Any changes need to be propagated to `COLUMN_TYPES`.
-#[derive(Hash, Eq, PartialEq, Debug, Clone, Copy, Ord, PartialOrd, Serialize, Deserialize)]
+#[derive(
+    Hash,
+    Eq,
+    PartialEq,
+    Debug,
+    Clone,
+    Copy,
+    Ord,
+    PartialOrd,
+    Serialize,
+    Deserialize,
+    Readable,
+    Writable,
+)]
 #[repr(u8)]
 pub enum ColumnType {
     I64 = 0u8,

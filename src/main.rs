@@ -1,19 +1,23 @@
-use std::fmt;
-
 use prettytable::cell;
 
-use formats::{Bincode, Bitcode, Ciborium, Json, Postcard, Rmp, Ron};
+use formats::{Bincode, Bitcode, Ciborium, Deser, Json, Postcard, Rmp, Ron};
 use prettytable::{
     format::{FormatBuilder, LinePosition, LineSeparator},
     Row, Table,
 };
 use serde::{de::DeserializeOwned, Serialize};
+use test_struct_agg2::IntermediateAggregationResults2;
 
-use crate::test_struct::get_test_struct;
+use crate::{formats::Speedy, test_struct_agg1::get_test_struct};
 
 use anyhow::Result;
 mod formats;
-mod test_struct;
+mod test_struct_agg1;
+mod test_struct_agg2;
+
+pub use speedy::LittleEndian as SpeedyLE;
+pub use speedy::Readable as SpeedyR;
+pub use speedy::Writable as SpeedyW;
 
 fn get_markdown_table() -> Table {
     let mut table = Table::new();
@@ -30,16 +34,32 @@ fn get_markdown_table() -> Table {
     table
 }
 
-trait Deser {
-    type Serialized: fmt::Debug;
-    fn name() -> String;
-    fn serialize<T: Serialize>(t: &T) -> Result<(usize, Self::Serialized)>;
-    fn deserialize<T: DeserializeOwned>(s: Self::Serialized) -> Result<T>;
+fn main() {
+    //let test_struct = get_test_struct();
+    let fs = std::fs::read_to_string("src/test_data_percentiles_1.json").unwrap();
+    let test_struct: IntermediateAggregationResults2 = serde_json::from_str(&fs).unwrap();
+    test_scenario("Percentiles Aggregation", test_struct);
+
+    let fs = std::fs::read_to_string("src/test_data_term_agg.json").unwrap();
+    let test_struct: IntermediateAggregationResults2 = serde_json::from_str(&fs).unwrap();
+    test_scenario("Term Aggregation", test_struct);
+
+    let test_struct = get_test_struct();
+    test_scenario("Aggregation Artificial", test_struct);
 }
 
-fn main() {
-    let test_struct = get_test_struct();
-
+fn test_scenario<
+    T: PartialEq
+        + Serialize
+        + DeserializeOwned
+        + std::fmt::Debug
+        + SpeedyW<SpeedyLE>
+        + SpeedyR<'static, SpeedyLE>,
+>(
+    name: &str,
+    test_struct: T,
+) {
+    println!("Scenario: {}", name);
     let mut table = get_markdown_table();
 
     let mut row = Row::empty();
@@ -59,6 +79,7 @@ fn main() {
     table.add_row(get_row_for_format::<_, Rmp>(&test_struct));
     table.add_row(get_row_for_format::<_, Postcard>(&test_struct));
     table.add_row(get_row_for_format::<_, Ciborium>(&test_struct));
+    table.add_row(get_row_for_format::<_, Speedy>(&test_struct));
     table.printstd();
 }
 
@@ -71,7 +92,15 @@ struct FormatResult {
     result: String,
 }
 
-fn get_row_for_format<T: PartialEq + Serialize + DeserializeOwned + std::fmt::Debug, F: Deser>(
+fn get_row_for_format<
+    T: PartialEq
+        + Serialize
+        + DeserializeOwned
+        + std::fmt::Debug
+        + SpeedyW<SpeedyLE>
+        + SpeedyR<'static, SpeedyLE>,
+    F: Deser,
+>(
     test_struct: &T,
 ) -> Row {
     let res = test_format::<T, F>(test_struct);
@@ -86,7 +115,15 @@ fn get_row_for_format<T: PartialEq + Serialize + DeserializeOwned + std::fmt::De
     row
 }
 
-fn test_format<T: PartialEq + Serialize + DeserializeOwned + std::fmt::Debug, F: Deser>(
+fn test_format<
+    T: PartialEq
+        + Serialize
+        + DeserializeOwned
+        + std::fmt::Debug
+        + SpeedyW<SpeedyLE>
+        + SpeedyR<'static, SpeedyLE>,
+    F: Deser,
+>(
     test_struct: &T,
 ) -> FormatResult {
     let start = std::time::Instant::now();
